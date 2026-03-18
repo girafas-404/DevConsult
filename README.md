@@ -13,7 +13,6 @@
 | [NOME 2] | [RM] |
 | [NOME 3] | [RM] |
 
-> ⚠️ **Importante:** Substitua os campos acima com os nomes e RMs reais da equipe.
 
 ---
 
