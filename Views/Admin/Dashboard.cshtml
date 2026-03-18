@@ -1,0 +1,149 @@
+@model List<cp4_Projeto.Models.Solicitacao>
+@{
+    ViewData["Title"] = "Dashboard - Tech Leader";
+}
+
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-speedometer2 text-primary me-2"></i>Dashboard
+            </h2>
+            <p class="text-muted mb-0">Gerencie as solicitações dos clientes</p>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-primary fs-6 px-3 py-2">
+                <i class="bi bi-shield-check me-1"></i>Tech Leader
+            </span>
+        </div>
+    </div>
+
+    <!-- TempData mensagem -->
+    @if (TempData["Mensagem"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Mensagem"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-5">
+        <div class="col-md-3">
+            <div class="stat-card stat-total">
+                <div class="stat-number">@Model.Count</div>
+                <div class="stat-label">Total</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card stat-pendente">
+                <div class="stat-number">@Model.Count(s => s.Status == StatusSolicitacao.Pendente)</div>
+                <div class="stat-label">⏳ Pendentes</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card stat-aprovada">
+                <div class="stat-number">@Model.Count(s => s.Status == StatusSolicitacao.Aprovada)</div>
+                <div class="stat-label">✅ Aprovadas</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card stat-reprovada">
+                <div class="stat-number">@Model.Count(s => s.Status == StatusSolicitacao.Reprovada)</div>
+                <div class="stat-label">❌ Reprovadas</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Solicitações -->
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="empty-state-icon mb-3">📭</div>
+            <h5 class="text-muted">Nenhuma solicitação ainda</h5>
+            <p class="text-muted">Aguardando clientes enviarem pedidos de serviço.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 pt-4">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-list-ul me-2 text-primary"></i>Solicitações Recebidas
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Cliente</th>
+                                <th>E-mail</th>
+                                <th>Serviço</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var s in Model.OrderByDescending(x => x.DataSolicitacao))
+                            {
+                                <tr>
+                                    <td class="fw-semibold">#@s.Id</td>
+                                    <td>@s.NomeCliente</td>
+                                    <td><a href="mailto:@s.EmailCliente">@s.EmailCliente</a></td>
+                                    <td>@s.ProblemaDescricao</td>
+                                    <td class="text-muted small">@s.DataSolicitacao.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        @{
+                                            var (badgeClass, badgeText) = s.Status switch
+                                            {
+                                                StatusSolicitacao.Pendente => ("warning", "⏳ Pendente"),
+                                                StatusSolicitacao.Aprovada => ("success", "✅ Aprovada"),
+                                                StatusSolicitacao.Reprovada => ("danger", "❌ Reprovada"),
+                                                StatusSolicitacao.EnviadaWhatsApp => ("info", "📱 WhatsApp"),
+                                                _ => ("secondary", "Desconhecido")
+                                            };
+                                        }
+                                        <span class="badge bg-@badgeClass">@badgeText</span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (s.Status == StatusSolicitacao.Pendente)
+                                        {
+                                            <div class="btn-group btn-group-sm">
+                                                <form asp-action="Aprovar" method="post" class="d-inline">
+                                                    <input type="hidden" name="id" value="@s.Id" />
+                                                    <button type="submit" class="btn btn-success btn-sm" title="Aprovar">
+                                                        <i class="bi bi-check-lg"></i>
+                                                    </button>
+                                                </form>
+                                                <form asp-action="Reprovar" method="post" class="d-inline">
+                                                    <input type="hidden" name="id" value="@s.Id" />
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Reprovar">
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </button>
+                                                </form>
+                                                <form asp-action="EnviarWhatsApp" method="post" class="d-inline">
+                                                    <input type="hidden" name="id" value="@s.Id" />
+                                                    <button type="submit" class="btn btn-info btn-sm text-white" title="Enviar ao Dev via WhatsApp">
+                                                        <i class="bi bi-whatsapp"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">@s.Observacao</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

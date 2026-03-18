@@ -1,0 +1,161 @@
+@model List<cp4_Projeto.Models.Problema>
+@{
+    ViewData["Title"] = "Serviços de Consultoria";
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <div class="hero-badge mb-3">🚀 Consultoria em Desenvolvimento</div>
+                <h1 class="hero-title">Resolva seus <span class="text-gradient">problemas técnicos</span> com especialistas</h1>
+                <p class="hero-subtitle">Escolha o serviço que você precisa, envie sua solicitação e nosso Tech Leader cuida de tudo.</p>
+                <a href="#servicos" class="btn btn-primary btn-lg mt-3">
+                    <i class="bi bi-arrow-down-circle me-2"></i>Ver Serviços
+                </a>
+            </div>
+            <div class="col-lg-5 d-none d-lg-flex justify-content-center">
+                <div class="hero-visual">⟨/⟩</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Serviços Section -->
+<section class="py-5" id="servicos">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <h2 class="section-title">Nossos <span class="text-gradient">Serviços</span></h2>
+            <p class="text-muted">Selecione um problema e envie sua solicitação para análise do Tech Leader</p>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var problema in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card service-card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <div class="service-icon mb-3">@problema.Icone</div>
+                            <span class="badge categoria-badge mb-2">@problema.Categoria</span>
+                            <h5 class="card-title fw-bold">@problema.Nome</h5>
+                            <p class="card-text text-muted flex-grow-1">@problema.Descricao</p>
+                            <div class="service-meta mt-3">
+                                <span class="meta-item">
+                                    <i class="bi bi-clock me-1"></i>@problema.TempoResposta
+                                </span>
+                                <span class="meta-item price">
+                                    R$ @problema.Preco.ToString("N0")
+                                </span>
+                            </div>
+                            <button class="btn btn-primary mt-3 btn-solicitar"
+                                    data-problema-id="@problema.Id"
+                                    data-problema-nome="@problema.Nome"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalSolicitacao">
+                                <i class="bi bi-send me-2"></i>Solicitar Serviço
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Modal de Solicitação -->
+<div class="modal fade" id="modalSolicitacao" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-send-fill text-primary me-2"></i>Enviar Solicitação
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <div>Serviço selecionado: <strong id="nomeServico"></strong></div>
+                </div>
+
+                <div id="formSolicitacao">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Seu Nome</label>
+                        <input type="text" class="form-control" id="nomeCliente" placeholder="Digite seu nome completo" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Seu E-mail</label>
+                        <input type="email" class="form-control" id="emailCliente" placeholder="seu@email.com" required />
+                    </div>
+                    <p class="text-muted small">
+                        <i class="bi bi-shield-check me-1 text-success"></i>
+                        Sua solicitação será analisada pelo nosso Tech Leader. Você receberá uma resposta pelo e-mail informado.
+                    </p>
+                </div>
+
+                <div id="feedbackMensagem" class="d-none"></div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnEnviar" onclick="enviarSolicitacao()">
+                    <i class="bi bi-send me-2"></i>Enviar Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let problemaIdSelecionado = null;
+
+    // Captura o ID e nome do problema ao abrir o modal
+    document.querySelectorAll('.btn-solicitar').forEach(btn => {
+        btn.addEventListener('click', function () {
+            problemaIdSelecionado = this.getAttribute('data-problema-id');
+            document.getElementById('nomeServico').textContent = this.getAttribute('data-problema-nome');
+            document.getElementById('formSolicitacao').classList.remove('d-none');
+            document.getElementById('feedbackMensagem').classList.add('d-none');
+            document.getElementById('btnEnviar').classList.remove('d-none');
+            document.getElementById('nomeCliente').value = '';
+            document.getElementById('emailCliente').value = '';
+        });
+    });
+
+    function enviarSolicitacao() {
+        const nome = document.getElementById('nomeCliente').value.trim();
+        const email = document.getElementById('emailCliente').value.trim();
+
+        if (!nome || !email) {
+            mostrarAlerta('⚠️ Preencha seu nome e e-mail antes de continuar.', 'warning');
+            return;
+        }
+
+
+        fetch('/Home/EnviarSolicitacao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `problemaId=${problemaIdSelecionado}&nomeCliente=${encodeURIComponent(nome)}&emailCliente=${encodeURIComponent(email)}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.sucesso) {
+                document.getElementById('formSolicitacao').classList.add('d-none');
+                document.getElementById('btnEnviar').classList.add('d-none');
+                mostrarAlerta(data.mensagem, 'success');
+            } else {
+                mostrarAlerta(data.mensagem, 'danger');
+            }
+        })
+        .catch(() => mostrarAlerta('Erro ao enviar. Tente novamente.', 'danger'));
+    }
+
+    function mostrarAlerta(msg, tipo) {
+        const el = document.getElementById('feedbackMensagem');
+        el.className = `alert alert-${tipo}`;
+        el.textContent = msg;
+        el.classList.remove('d-none');
+    }
+</script>
+}
