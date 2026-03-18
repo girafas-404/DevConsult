@@ -40,7 +40,7 @@ Sistema de **Consultoria em Desenvolvimento de Software** onde:
 
 ```bash
 # Clone o repositório
-git clone [URL_DO_REPO]
+git clone https://github.com/girafas-404/DevConsult
 
 # Navegue até a pasta do projeto
 cd cp4-Projeto
