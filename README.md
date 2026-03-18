@@ -9,11 +9,10 @@
 
 | Nome | RM |
 |------|----|
-| [NOME 1] | [RM] |
+| Rafael De Almeida Sigoli | RM554019 |
 | [NOME 2] | [RM] |
 | [NOME 3] | [RM] |
 
-> ⚠️ **Importante:** Substitua os campos acima com os nomes e RMs reais da equipe.
 
 ---
 
@@ -41,7 +40,7 @@ Sistema de **Consultoria em Desenvolvimento de Software** onde:
 
 ```bash
 # Clone o repositório
-git clone [URL_DO_REPO]
+git clone https://github.com/girafas-404/DevConsult
 
 # Navegue até a pasta do projeto
 cd cp4-Projeto
