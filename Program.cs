@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
+
+
 // Add MVC
 builder.Services.AddControllersWithViews();
 
@@ -16,15 +20,22 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = true;
     });
 
+
+
+
 builder.Services.AddAuthorization();
 
+
 var app = builder.Build();
+
 
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
